@@ -20,7 +20,7 @@
 padToPowerOfTwo = 1
 ;	| If 1, pads the end of the ROM to the next power of two bytes (for real hardware)
 ;
-allOptimizations = 0
+allOptimizations = 1
 ;	| If 1, enables all optimizations
 ;
 skipChecksumCheck = 0|allOptimizations
@@ -88,9 +88,9 @@ StartOfRom:
 ; byte_100:
 Header:
 	dc.b "SEGA GENESIS    " ; Console name
-	dc.b "(C)SEGA 1992.SEP" ; Copyright/Date
-	dc.b "SONIC THE             HEDGEHOG 2                " ; Domestic name
-	dc.b "SONIC THE             HEDGEHOG 2                " ; International name
+	dc.b "(C)NOOB 2016.FEB" ; Copyright/Date
+	dc.b "SUPER SONIC THE HEDGEHOG 2                      " ; Domestic name
+	dc.b "SUPER SONIC THE HEDGEHOG 2                      " ; International name
     if gameRevision=0
 	dc.b "GM 00001051-00"   ; Version (REV00)
     elseif gameRevision=1
@@ -3908,11 +3908,11 @@ TitleScreen:
 	move.w	#make_art_tile(ArtTile_ArtNem_Title,3,1),d0
 	bsr.w	EniDec
 
-	lea	(Chunk_Table+$858).l,a1
+	lea	(Chunk_Table+$856).l,a1
 	lea	(CopyrightText).l,a2
 
 	moveq	#bytesToWcnt(CopyrightText_End-CopyrightText),d6
--	move.w	(a2)+,(a1)+	; load mappings for copyright 1992 sega message
+-	move.w	(a2)+,(a1)+	; load mappings for copyright message
 	dbf	d6,-
 
 	lea	(Chunk_Table).l,a1
@@ -4132,20 +4132,28 @@ TailsNameCheat_Buttons:
 ; ArtNem_3DF4:
 ArtNem_Player1VS2:	BINCLUDE	"art/nemesis/1Player2VS.bin"
 
+	charset '0','9',0 ; Add charset for numbers, as suggested by MainMemory
+	charset 'A','Z',$E ; Add charset for letters, as suggested by MainMemory
+
 ; word_3E82:
 CopyrightText:
 	dc.w  make_art_tile(ArtTile_ArtNem_FontStuff_TtlScr + $0B,0,0)	; (C)
+;	dc.w  make_art_tile(ArtTile_VRAM_Start,0,0)	;
+	dc.w  make_art_tile(ArtTile_ArtNem_FontStuff_TtlScr + '2',0,0)	; 1
+	dc.w  make_art_tile(ArtTile_ArtNem_FontStuff_TtlScr + '0',0,0)	; 9
+	dc.w  make_art_tile(ArtTile_ArtNem_FontStuff_TtlScr + '1',0,0)	; 9
+	dc.w  make_art_tile(ArtTile_ArtNem_FontStuff_TtlScr + '6',0,0)	; 2
 	dc.w  make_art_tile(ArtTile_VRAM_Start,0,0)	;
-	dc.w  make_art_tile(ArtTile_ArtNem_FontStuff_TtlScr + $01,0,0)	; 1
-	dc.w  make_art_tile(ArtTile_ArtNem_FontStuff_TtlScr + $09,0,0)	; 9
-	dc.w  make_art_tile(ArtTile_ArtNem_FontStuff_TtlScr + $09,0,0)	; 9
-	dc.w  make_art_tile(ArtTile_ArtNem_FontStuff_TtlScr + $02,0,0)	; 2
-	dc.w  make_art_tile(ArtTile_VRAM_Start,0,0)	;
-	dc.w  make_art_tile(ArtTile_ArtNem_FontStuff_TtlScr + $20,0,0)	; S
-	dc.w  make_art_tile(ArtTile_ArtNem_FontStuff_TtlScr + $12,0,0)	; E
-	dc.w  make_art_tile(ArtTile_ArtNem_FontStuff_TtlScr + $14,0,0)	; G
-	dc.w  make_art_tile(ArtTile_ArtNem_FontStuff_TtlScr + $0E,0,0)	; A
+	dc.w  make_art_tile(ArtTile_ArtNem_FontStuff_TtlScr + 'I',0,0)	; I
+	dc.w  make_art_tile(ArtTile_ArtNem_FontStuff_TtlScr + 'M',0,0)	; M
+	dc.w  make_art_tile(ArtTile_ArtNem_FontStuff_TtlScr + 'A',0,0)	; A
+	dc.w  make_art_tile(ArtTile_ArtNem_FontStuff_TtlScr + 'N',0,0)	; N
+	dc.w  make_art_tile(ArtTile_ArtNem_FontStuff_TtlScr + 'O',0,0)	; O
+	dc.w  make_art_tile(ArtTile_ArtNem_FontStuff_TtlScr + 'O',0,0)	; O
+	dc.w  make_art_tile(ArtTile_ArtNem_FontStuff_TtlScr + 'B',0,0)	; B
 CopyrightText_End:
+
+	charset
 
     if ~~removeJmpTos
 ; sub_3E98:
@@ -34167,7 +34175,7 @@ Sonic_JumpHeight:
 	bne.s	+		; if yes, branch
 	move.w	d1,y_vel(a0)	; immediately reduce Sonic's upward speed to d1
 +
-	tst.b	y_vel(a0)		; is Sonic exactly at the height of his jump?
+	andi.b	#button_B_mask,d0 ; is the B button pressed?
 	beq.s	Sonic_CheckGoSuper	; if yes, test for turning into Super Sonic
 	rts
 ; ---------------------------------------------------------------------------
@@ -34194,8 +34202,8 @@ return_1AB36:
 Sonic_CheckGoSuper:
 	tst.b	(Super_Sonic_flag).w	; is Sonic already Super?
 	bne.s	return_1ABA4		; if yes, branch
-	cmpi.b	#7,(Emerald_count).w	; does Sonic have exactly 7 emeralds?
-	bne.s	return_1ABA4		; if not, branch
+	;cmpi.b	#7,(Emerald_count).w	
+	;bne.s	return_1ABA4		
 	cmpi.w	#50,(Ring_count).w	; does Sonic have at least 50 rings?
 	blo.s	return_1ABA4		; if not, branch
     if gameRevision=2
