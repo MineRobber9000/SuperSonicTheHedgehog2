@@ -1,0 +1,1 @@
+To share a release of this hack, simply find the tag and append it to ```http://tinyurl.com/ssth2release```, for example, ```v1.0-BETA``` (Beta 1) becomes ```http://tinyurl.com/ssth2release/v1.0-BETA``` [(this)](http://tinyurl.com/ssth2release/v1.0-BETA). The link to all releases is ```http://tinyurl.com/ssth2releases```
