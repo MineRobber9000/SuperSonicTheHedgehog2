@@ -108,9 +108,9 @@ ROMEndLoc:
 	dc.l EndOfRom-1		; ROM End
 	dc.l RAM_Start&$FFFFFF		; RAM Start
 	dc.l (RAM_End-1)&$FFFFFF		; RAM End
-	dc.b "    "		; Backup RAM ID
-	dc.l $20202020		; Backup RAM start address
-	dc.l $20202020		; Backup RAM end address
+	dc.b $5241F820		; Backup RAM ID
+	dc.l $200000		; Backup RAM start address
+	dc.l $200200		; Backup RAM end address
 	dc.b "            "	; Modem support
 	dc.b "                                        "	; Notes
 	dc.b "JUE             " ; Country
@@ -3827,6 +3827,7 @@ JmpTo_RunObjects
 ; ===========================================================================
 ; loc_3998:
 TitleScreen:
+    move.w  #0,($F100).w
 	move.b	#MusID_Stop,d0
 	bsr.w	PlayMusic
 	bsr.w	ClearPLC
@@ -4222,6 +4223,12 @@ MusicList2: zoneOrderedTable 1,1
 ; ---------------------------------------------------------------------------
 ; loc_3EC4:
 Level:
+	cmpi.b  #GameModeID_Demo,(Game_Mode).w
+	bra.w   NoRAMUse
+	lea	(Update_HUD_rings_2P).w,a3
+	move.w  ($F100).w,(Ring_count).w
+	move.w  #1,(a3)
+NoRAMUse:
 	bset	#GameModeFlag_TitleCard,(Game_Mode).w ; add $80 to screen mode (for pre level sequence)
 	tst.w	(Demo_mode_flag).w	; test the old flag for the credits demos (now unused)
 	bmi.s	+
@@ -34204,13 +34211,13 @@ Sonic_CheckGoSuper:
 	bne.s	return_1ABA4		; if yes, branch
 	;cmpi.b	#7,(Emerald_count).w	
 	;bne.s	return_1ABA4		
-	cmpi.w	#50,(Ring_count).w	; does Sonic have at least 50 rings?
+	cmpi.w	#30,(Ring_count).w	; does Sonic have at least 30 rings?
 	blo.s	return_1ABA4		; if not, branch
-    if gameRevision=2
+    ;if gameRevision=2
 	; fixes a bug where the player can get stuck if transforming at the end of a level
 	tst.b	(Update_HUD_timer).w	; has Sonic reached the end of the act?
 	beq.s	return_1ABA4		; if yes, branch
-    endif
+    ;endif
 
 	move.b	#1,(Super_Sonic_palette).w
 	move.b	#$F,(Palette_timer).w
@@ -34225,8 +34232,8 @@ Sonic_CheckGoSuper:
 	bset	#1,status_secondary(a0)	; make Sonic invincible
 	move.w	#SndID_SuperTransform,d0
 	jsr	(PlaySound).l	; Play transformation sound effect.
-	move.w	#MusID_SuperSonic,d0
-	jmp	(PlayMusic).l	; load the Super Sonic song and return
+	;move.w	#MusID_SuperSonic,d0
+	;jmp	(PlayMusic).l	; load the Super Sonic song and return
 
 ; ---------------------------------------------------------------------------
 return_1ABA4:
