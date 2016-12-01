@@ -108,7 +108,7 @@ ROMEndLoc:
 	dc.l EndOfRom-1		; ROM End
 	dc.l RAM_Start&$FFFFFF		; RAM Start
 	dc.l (RAM_End-1)&$FFFFFF		; RAM End
-	dc.b $5241F820		; Backup RAM ID
+	dc.l $5241F820		; Backup RAM ID
 	dc.l $200000		; Backup RAM start address
 	dc.l $200200		; Backup RAM end address
 	dc.b "            "	; Modem support
@@ -3827,7 +3827,7 @@ JmpTo_RunObjects
 ; ===========================================================================
 ; loc_3998:
 TitleScreen:
-    move.w  #0,($F100).w
+    move.w  #0,($FF0100).l
 	move.b	#MusID_Stop,d0
 	bsr.w	PlayMusic
 	bsr.w	ClearPLC
@@ -4226,7 +4226,7 @@ Level:
 	cmpi.b  #GameModeID_Demo,(Game_Mode).w
 	bra.w   NoRAMUse
 	lea	(Update_HUD_rings_2P).w,a3
-	move.w  ($F100).w,(Ring_count).w
+	move.w  ($FF0100).l,(Ring_count).w
 	move.w  #1,(a3)
 NoRAMUse:
 	bset	#GameModeFlag_TitleCard,(Game_Mode).w ; add $80 to screen mode (for pre level sequence)
